@@ -1,9 +1,9 @@
 
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import './Auth.css';
+
 
 function Login() {
     const [formData, setFormData] = useState({
@@ -14,41 +14,47 @@ function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
 
+
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
-        setError(''); // Clear error on input change
+        setError('');
     };
+
+
+    const handleForgotPassword = () => {
+        // Add your forgot password logic here
+        console.log('Forgot password clicked');
+        // navigate('/forgot-password'); // If you have a forgot password page
+    };
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        // Add your API authentication logic here
-        // Example: const response = await fetch('/api/login', {...});
-        
-        // For demo purposes - replace with real authentication
+
         if (formData.email && formData.password) {
-            // Simulate successful login
             const userData = {
                 email: formData.email,
                 name: formData.email.split('@')[0],
                 id: Date.now()
             };
-            
-            login(userData); // Store user in context and localStorage
-            navigate('/home'); // Navigate to protected home page
+
+            login(userData);
+            navigate('/home');
         } else {
             setError('Please enter valid credentials');
         }
     };
+
 
     return (
         <div className="auth-container">
             <div className="auth-card">
                 <h2 className="auth-title">Welcome Back</h2>
                 <p className="auth-subtitle">Please login to your account</p>
+
 
                 {error && (
                     <div style={{
@@ -61,6 +67,7 @@ function Login() {
                         {error}
                     </div>
                 )}
+
 
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
@@ -76,6 +83,7 @@ function Login() {
                         />
                     </div>
 
+
                     <div className="form-group">
                         <label htmlFor="password">Password</label>
                         <input
@@ -89,18 +97,32 @@ function Login() {
                         />
                     </div>
 
+
                     <div className="form-options">
                         <label className="checkbox-label">
                             <input type="checkbox" />
                             <span>Remember me</span>
                         </label>
-                        <a href="#" className="forgot-password">Forgot Password?</a>
+                        <button
+                            type="button"
+                            onClick={handleForgotPassword}
+                            className="forgot-password"
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Forgot Password?
+                        </button>
                     </div>
+
 
                     <button type="submit" className="auth-button">
                         Login
                     </button>
                 </form>
+
 
                 <p className="auth-footer">
                     Don't have an account? <Link to="/register" className="auth-link">Sign up</Link>
@@ -109,5 +131,6 @@ function Login() {
         </div>
     );
 }
+
 
 export default Login;
