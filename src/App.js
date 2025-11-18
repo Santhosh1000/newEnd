@@ -5,10 +5,10 @@ import { AuthProvider } from './auth/AuthContext';
 
 import './App.css';
 import Register from './auth/Register';
-import Home from './componenets/Home';
+import Home from './componenets/home/Home';
 import Login from './auth/Login';
 import ProtectedRoute from './components/ProtectedRoute';
-import ProductUpload from './componenets/ProductUpload';
+import ProductUpload from './componenets/product/ProductUpload';
 
 function App() {
   return (

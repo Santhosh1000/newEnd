@@ -1,14 +1,14 @@
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from './Layout';
-// import { Input, TextArea, Select, ImageUpload } from '../ui';
+import Layout from '../Layout';
+import ImageUpload from '../../components/ui/ImageUpload';
+import Input from '../../components/ui/Input';
+import TextArea from '../../components/ui/TextArea';
+import Select from '../../components/ui/Select';
+import { createProduct } from '../../api/productApi';
 import './ProductUpload.css';
-import ImageUpload from '../components/ui/ImageUpload';
-import Input from '../components/ui/Input';
-import TextArea from '../components/ui/TextArea';
-import Select from '../components/ui/Select';
 
 function ProductUpload() {
     const navigate = useNavigate();
@@ -17,9 +17,9 @@ function ProductUpload() {
         name: '',
         description: '',
         price: '',
-        category: '',
+        category_id: '',
         stock: '',
-        sku: '',
+        image_url: '',
     });
 
     const [images, setImages] = useState([]);
@@ -27,15 +27,16 @@ function ProductUpload() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
 
+    // Categories - these should match your database
     const categories = [
-        'Electronics',
-        'Clothing',
-        'Home & Garden',
-        'Sports',
-        'Books',
-        'Toys',
-        'Beauty',
-        'Food',
+        { id: '1', name: 'Electronics' },
+        { id: '2', name: 'Clothing' },
+        { id: '3', name: 'Home & Garden' },
+        { id: '4', name: 'Sports' },
+        { id: '5', name: 'Books' },
+        { id: '6', name: 'Toys' },
+        { id: '7', name: 'Beauty' },
+        { id: '8', name: 'Food' },
     ];
 
     const handleInputChange = (e) => {
@@ -77,14 +78,23 @@ function ProductUpload() {
         if (!formData.price || parseFloat(formData.price) <= 0) {
             newErrors.price = 'Valid price is required';
         }
-        if (!formData.category) newErrors.category = 'Category is required';
+        if (!formData.category_id) newErrors.category_id = 'Category is required';
         if (!formData.stock || parseInt(formData.stock) < 0) {
             newErrors.stock = 'Valid stock quantity is required';
         }
-        if (!formData.sku.trim()) newErrors.sku = 'SKU is required';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    // Helper function to upload images
+    const uploadImages = async (imageFiles) => {
+        // TODO: Implement image upload to your storage solution
+        // For now, returning a placeholder URL
+        if (imageFiles.length > 0) {
+            return 'https://via.placeholder.com/400';
+        }
+        return '';
     };
 
     const handleSubmit = async (e) => {
@@ -95,32 +105,40 @@ function ProductUpload() {
         setIsSubmitting(true);
 
         try {
-            const formDataToSend = new FormData();
+            // Upload images first (if any)
+            const imageUrl = await uploadImages(images);
 
-            Object.keys(formData).forEach(key => {
-                formDataToSend.append(key, formData[key]);
-            });
+            // Prepare payload matching backend expectations
+            const payload = {
+                name: formData.name,
+                description: formData.description,
+                price: parseFloat(formData.price),
+                stock: parseInt(formData.stock),
+                category_id: parseInt(formData.category_id), // ✅ Fixed: Use selected category
+                image_url: imageUrl || null,
+                created_at: new Date().toISOString(),
+            };
 
-            images.forEach((image) => {
-                formDataToSend.append('images', image);
-            });
+            // Call the API using the service
+            const result = await createProduct(payload);
 
-            const response = await fetch('/api/admin/products', {
-                method: 'POST',
-                body: formDataToSend,
-            });
-
-            if (!response.ok) throw new Error('Failed to upload product');
-
-            const result = await response.json();
             console.log('Product uploaded:', result);
-
             alert('Product uploaded successfully!');
             handleClear();
             setTimeout(() => navigate('/products'), 1500);
+
         } catch (error) {
             console.error('Error uploading product:', error);
-            alert('Failed to upload product. Please try again.');
+
+            // Handle specific error cases
+            if (error.message.includes('401') || error.message.includes('403')) {
+                alert('You are not authorized to perform this action. Please login as admin.');
+                navigate('/login');
+            } else if (error.message.includes('foreign key constraint')) {
+                alert('Invalid category selected. Please choose a valid category.');
+            } else {
+                alert(error.message || 'Failed to upload product. Please try again.');
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -131,9 +149,9 @@ function ProductUpload() {
             name: '',
             description: '',
             price: '',
-            category: '',
+            category_id: '',
             stock: '',
-            sku: '',
+            image_url: '',
         });
         imagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
         setImagePreviews([]);
@@ -204,22 +222,12 @@ function ProductUpload() {
                         <div className="form-row">
                             <Select
                                 label="Category"
-                                name="category"
-                                value={formData.category}
+                                name="category_id"
+                                value={formData.category_id}
                                 onChange={handleInputChange}
-                                error={errors.category}
-                                options={categories}
+                                error={errors.category_id}
+                                options={categories.map(cat => cat.name)}
                                 placeholder="Select a category"
-                                required
-                            />
-
-                            <Input
-                                label="SKU"
-                                name="sku"
-                                value={formData.sku}
-                                onChange={handleInputChange}
-                                error={errors.sku}
-                                placeholder="SKU-001"
                                 required
                             />
                         </div>
@@ -256,4 +264,3 @@ function ProductUpload() {
 }
 
 export default ProductUpload;
-

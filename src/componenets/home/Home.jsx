@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from './Layout';
+import Layout from '../Layout';
 import './Home.css';
 
 function Home() {
@@ -15,7 +15,7 @@ function Home() {
             title: 'Add Product',
             description: 'Upload new products to your store',
             buttonText: 'Upload Now',
-            onClick: () => navigate('/products/upload')
+            onClick: () => navigate('/productUpload')
         },
         {
             id: 2,

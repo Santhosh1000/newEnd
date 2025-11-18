@@ -1,133 +1,100 @@
 
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from './AuthContext';
-import './Auth.css'; 
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { registerUser } from "../api/authApi";
+import { useAuth } from "./AuthContext";
+import "./Auth.css";
 
 function Register() {
     const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phone: ""
     });
-    const [error, setError] = useState('');
+
+    const [error, setError] = useState("");
     const navigate = useNavigate();
     const { login } = useAuth();
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-        setError('');
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validation
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match!');
-            return;
+            return setError("Passwords do not match!");
         }
 
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
-            return;
+        try {
+            const payload = {
+                name: formData.fullName,
+                email: formData.email,
+                password: formData.password,
+                phone: formData.phone,
+            };
+
+            const response = await registerUser(payload);
+
+            login(response.user, response.token);
+            navigate("/home");
+
+        } catch (err) {
+            setError(err.message);
         }
-
-        // Add your API registration logic here
-        // Example: const response = await fetch('/api/register', {...});
-
-        // For demo purposes - auto login after registration
-        const userData = {
-            email: formData.email,
-            name: formData.fullName,
-            id: Date.now()
-        };
-
-        login(userData); // Auto login after registration
-        navigate('/home'); // Go directly to home
     };
 
     return (
         <div className="auth-container">
             <div className="auth-card">
                 <h2 className="auth-title">Create Account</h2>
-                <p className="auth-subtitle">Sign up to get started</p>
 
-                {error && (
-                    <div style={{
-                        padding: '10px',
-                        marginBottom: '15px',
-                        backgroundColor: '#fee',
-                        color: '#c33',
-                        borderRadius: '5px'
-                    }}>
-                        {error}
-                    </div>
-                )}
+                {error && <div className="error-box">{error}</div>}
 
-                <form onSubmit={handleSubmit} className="auth-form">
+                <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="fullName">Full Name</label>
-                        <input
-                            type="text"
-                            id="fullName"
-                            name="fullName"
-                            value={formData.fullName}
-                            onChange={handleChange}
-                            placeholder="Enter your full name"
-                            required
-                        />
+                        <label>Full Name</label>
+                        <input type="text" name="fullName"
+                          value={formData.fullName}
+                          onChange={handleChange}
+                          required />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="email">Email Address</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder="Enter your email"
-                            required
-                        />
+                        <label>Email</label>
+                        <input type="email" name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            placeholder="Create a password"
-                            required
-                            minLength="6"
-                        />
+                        <label>Phone</label>
+                        <input type="text" name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          required />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="confirmPassword">Confirm Password</label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            placeholder="Confirm your password"
-                            required
-                        />
+                        <label>Password</label>
+                        <input type="password" name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          required />
                     </div>
 
-                    <label className="checkbox-label terms">
-                        <input type="checkbox" required />
-                        <span>I agree to the Terms & Conditions</span>
-                    </label>
+                    <div className="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          required />
+                    </div>
 
                     <button type="submit" className="auth-button">
                         Create Account
@@ -135,7 +102,7 @@ function Register() {
                 </form>
 
                 <p className="auth-footer">
-                    Already have an account? <Link to="/login" className="auth-link">Login</Link>
+                    Already have an account? <Link to="/login">Login</Link>
                 </p>
             </div>
         </div>
