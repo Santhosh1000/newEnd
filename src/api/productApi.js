@@ -24,3 +24,6 @@ export const updateProduct = (id, payload) => {
 export const deleteProduct = (id) => {
     return apiClient.delete(`/products/${id}`, { requiresAuth: true });
 };
+
+
+// testing this was working
