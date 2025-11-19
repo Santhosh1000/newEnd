@@ -4,9 +4,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { loginUser } from "../api/authApi";
-import { getAuthToken, setAuthToken } from "../api/apiClient"; // Import this
 import "./Auth.css";
-
 function Login() {
     const [formData, setFormData] = useState({
         email: "",
