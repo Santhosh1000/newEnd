@@ -1,5 +1,10 @@
 
-const API_BASE = process.env.REACT_APP_API_BASE;
+// const API_BASE = process.env.REACT_APP_API_BASE;
+// apiClient.js or similar
+const API_BASE = process.env.NODE_ENV === 'production'
+    ? 'https://snnew10.vercel.app'
+    : 'http://localhost:4000';
+
 const getStoredToken = () => {
     return localStorage.getItem("token");
 };
